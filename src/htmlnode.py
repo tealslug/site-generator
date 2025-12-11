@@ -24,4 +24,4 @@ class HTMLNode:
     def props_to_html(self) -> str:
         if self.props is None:
             return ""
-        return " " + " ".join([f"{key}={value}" for key, value in self.props.items()])
+        return " " + " ".join([f"{key}=\"{value}\"" for key, value in self.props.items()])
