@@ -12,9 +12,11 @@ def split_nodes_on(nodes: list[TextNode], split_on: str, text_type: TextType) ->
       continue
 
     parts = node.text.split(split_on)
-    new_nodes.append(TextNode(parts[0], TextType.PLAIN))
+    if len(parts[0]) > 0:
+      new_nodes.append(TextNode(parts[0], TextType.PLAIN))
     new_nodes.append(TextNode(parts[1], text_type))
-    new_nodes.append(TextNode(parts[2], TextType.PLAIN))
+    if len(parts[2]) > 0:
+      new_nodes.append(TextNode(parts[2], TextType.PLAIN))
 
   return new_nodes
 

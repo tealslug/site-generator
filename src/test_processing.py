@@ -14,6 +14,24 @@ class TestProcessing(unittest.TestCase):
     new_nodes = split_nodes_on(nodes, "_", TextType.ITALIC)
     self.assertEqual(new_nodes, [TextNode("one ", TextType.PLAIN), TextNode("two", TextType.ITALIC), TextNode(" three", TextType.PLAIN)])
 
+  def test_split_nodes_on_with_empty_string(self):
+    nodes = [TextNode("one __ three", TextType.PLAIN)]
+    new_nodes = split_nodes_on(nodes, "_", TextType.ITALIC)
+    self.assertEqual(new_nodes, [TextNode("one ", TextType.PLAIN), TextNode("", TextType.ITALIC), TextNode(" three", TextType.PLAIN)])
+
+  def test_delim_bold_and_italic(self):
+    node = TextNode("**bold** and _italic_", TextType.PLAIN)
+    new_nodes = split_nodes_on([node], "**", TextType.BOLD)
+    new_nodes = split_nodes_on(new_nodes, "_", TextType.ITALIC)
+    self.assertEqual(
+      [
+        TextNode("bold", TextType.BOLD),
+        TextNode(" and ", TextType.PLAIN),
+        TextNode("italic", TextType.ITALIC),
+      ],
+      new_nodes,
+    )
+
   def test_split_nodes_on_code(self):
     nodes = [TextNode("one `two` three", TextType.PLAIN)]
     new_nodes = split_nodes_on(nodes, "`", TextType.CODE)
