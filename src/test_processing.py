@@ -42,6 +42,11 @@ class TestProcessing(unittest.TestCase):
     new_nodes = split_nodes_on(nodes, "`", TextType.CODE)
     self.assertEqual(new_nodes, [TextNode("one ", TextType.PLAIN), TextNode("two", TextType.CODE), TextNode(" three", TextType.PLAIN)])
 
+  def test_split_nodes_on_with_empty_input(self):
+    nodes = []
+    new_nodes = split_nodes_on(nodes, "`", TextType.CODE)
+    self.assertEqual(new_nodes, [])
+  
   def test_extract_markdown_images_single(self):
     text = "![rick roll](https://i.imgur.com/aKaOqIh.gif)"
     self.assertEqual(extract_markdown_images(text), [("rick roll", "https://i.imgur.com/aKaOqIh.gif")])
