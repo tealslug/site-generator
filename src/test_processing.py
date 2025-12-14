@@ -19,6 +19,11 @@ class TestProcessing(unittest.TestCase):
     new_nodes = split_nodes_on(nodes, "_", TextType.ITALIC)
     self.assertEqual(new_nodes, [TextNode("one ", TextType.PLAIN), TextNode("", TextType.ITALIC), TextNode(" three", TextType.PLAIN)])
 
+  def test_split_nodes_on_with_no_match(self):
+    nodes = [TextNode("one two three", TextType.PLAIN)]
+    new_nodes = split_nodes_on(nodes, "_", TextType.ITALIC)
+    self.assertEqual(new_nodes, [TextNode("one two three", TextType.PLAIN)])
+
   def test_delim_bold_and_italic(self):
     node = TextNode("**bold** and _italic_", TextType.PLAIN)
     new_nodes = split_nodes_on([node], "**", TextType.BOLD)
