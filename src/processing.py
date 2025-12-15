@@ -1,6 +1,9 @@
 import re
 from textnode import TextNode, TextType
 
+IMAGE_RE = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
+LINK_RE = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
+
 def split_nodes_on(nodes: list[TextNode], split_on: str, text_type: TextType) -> list[TextNode]:
   new_nodes = []
   for node in nodes:
@@ -49,4 +52,13 @@ def split_nodes_on_regex(nodes: list[TextNode], regex: re.Pattern, text_type: Te
     else:
       new_nodes.append(node)
     
+  return new_nodes
+
+def text_to_nodes(text: str) -> list[TextNode]:
+  new_nodes = [TextNode(text, TextType.PLAIN)]
+  new_nodes = split_nodes_on(new_nodes, "**", TextType.BOLD)
+  new_nodes = split_nodes_on(new_nodes, "_", TextType.ITALIC)
+  new_nodes = split_nodes_on(new_nodes, "`", TextType.CODE)
+  new_nodes = split_nodes_on_regex(new_nodes, re.compile(IMAGE_RE), TextType.IMAGE)
+  new_nodes = split_nodes_on_regex(new_nodes, re.compile(LINK_RE), TextType.LINK)
   return new_nodes

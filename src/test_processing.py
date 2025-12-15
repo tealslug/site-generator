@@ -1,7 +1,7 @@
 import re
 import unittest
 
-from processing import split_nodes_on, split_nodes_on_regex
+from processing import split_nodes_on, split_nodes_on_regex, text_to_nodes
 from textnode import TextNode, TextType
 
 class TestProcessing(unittest.TestCase):
@@ -103,3 +103,34 @@ class TestProcessing(unittest.TestCase):
     nodes = [TextNode("one ", TextType.PLAIN), TextNode("two", TextType.ITALIC), TextNode(" three", TextType.PLAIN)]
     new_nodes = split_nodes_on_regex(nodes, re.compile(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"), TextType.IMAGE)
     self.assertEqual(new_nodes, nodes)
+
+  def test_text_to_nodes(self):
+    nodes = text_to_nodes("This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png) and trailing text")
+    self.assertListEqual(
+        [
+            TextNode("This is text with an ", TextType.PLAIN),
+            TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextType.PLAIN),
+            TextNode("second image", TextType.IMAGE, "https://i.imgur.com/3elNhQu.png"),
+            TextNode(" and trailing text", TextType.PLAIN),
+        ],
+        nodes,
+    )
+  
+  def test_text_to_nodes_all_types(self):
+    nodes = text_to_nodes("This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)")
+    self.assertListEqual(
+        [
+            TextNode("This is ", TextType.PLAIN),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with an ", TextType.PLAIN),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word and a ", TextType.PLAIN),
+            TextNode("code block", TextType.CODE),
+            TextNode(" and an ", TextType.PLAIN),
+            TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.PLAIN),
+            TextNode("link", TextType.LINK, "https://boot.dev"),
+        ],
+        nodes,
+    )
