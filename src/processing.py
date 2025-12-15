@@ -20,21 +20,26 @@ def split_nodes_on(nodes: list[TextNode], split_on: str, text_type: TextType) ->
 
   return new_nodes
 
-# Extracts all regex pairs from a string.  By pairs we mean that the pattern
-# should have two groups, and we return a list of those groups.
-def extract_regex_pairs(text: str, regex: re.Pattern) -> list[(str, str)]:
+# Splits all regex pairs from a string.  By pairs we mean that the pattern
+# should have two groups, with the first representing the text content of
+# a node, and the second representing the url content of the node.  We then
+# return a list of these split out nodes, along with any in-between text as 
+# nodes of type PLAIN.  The text_type parameter is the type of the node to
+# create for the matched pairs.
+def split_nodes_on_regex(nodes: list[TextNode], regex: re.Pattern, text_type: TextType) -> list[TextNode]:
   found = []
-  while True:
-    match = regex.search(text)
-    if match is None:
-      break
-    found.append(match.groups())
-    text = text[match.end():]
+  for node in nodes:
+    text = node.text
+    while True:
+      match = regex.search(text)
+      if match is None:
+        break
+      # Add the text before the match
+      if match.start() > 0:
+        found.append(TextNode(text[:match.start()], TextType.PLAIN))
+      found.append(TextNode(match.group(1), text_type, match.group(2)))
+      text = text[match.end():]
+    if len(text) > 0:
+      found.append(TextNode(text, TextType.PLAIN))
 
   return found
-
-def extract_markdown_images(text: str) -> list[(str, str)]:
-  return extract_regex_pairs(text, re.compile(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"))
-
-def extract_markdown_links(text: str) -> list[(str, str)]:
-  return extract_regex_pairs(text, re.compile(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"))

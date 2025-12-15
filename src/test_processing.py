@@ -1,6 +1,7 @@
+import re
 import unittest
 
-from processing import split_nodes_on, extract_markdown_images, extract_markdown_links
+from processing import split_nodes_on, split_nodes_on_regex
 from textnode import TextNode, TextType
 
 class TestProcessing(unittest.TestCase):
@@ -47,26 +48,53 @@ class TestProcessing(unittest.TestCase):
     new_nodes = split_nodes_on(nodes, "`", TextType.CODE)
     self.assertEqual(new_nodes, [])
   
-  def test_extract_markdown_images_single(self):
-    text = "![rick roll](https://i.imgur.com/aKaOqIh.gif)"
-    self.assertEqual(extract_markdown_images(text), [("rick roll", "https://i.imgur.com/aKaOqIh.gif")])
+  def test_split_nodes_on_regex_markdown_images_single(self):
+    nodes = [TextNode("![rick roll](https://i.imgur.com/aKaOqIh.gif)", TextType.PLAIN)]
+    new_nodes = split_nodes_on_regex(nodes, re.compile(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"), TextType.IMAGE)
+    self.assertEqual(new_nodes, [TextNode("rick roll", TextType.IMAGE, "https://i.imgur.com/aKaOqIh.gif")])
 
-  def test_extract_markdown_images_multiple(self):
-    text = "![rick roll](https://i.imgur.com/aKaOqIh.gif)![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
-    self.assertEqual(extract_markdown_images(text), [("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")])
+  def test_split_nodes_on_regex_markdown_images_multiple(self):
+    nodes = [TextNode("![rick roll](https://i.imgur.com/aKaOqIh.gif)![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)", TextType.PLAIN)]
+    new_nodes = split_nodes_on_regex(nodes, re.compile(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"), TextType.IMAGE)
+    self.assertEqual(new_nodes, [TextNode("rick roll", TextType.IMAGE, "https://i.imgur.com/aKaOqIh.gif"), TextNode("obi wan", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg")])
 
-  def test_extract_markdown_images_none(self):
-    text = "this text doesn't have any images"
-    self.assertEqual(extract_markdown_images(text), [])
+  def test_split_nodes_on_regex_extract_markdown_images_none(self):
+    nodes = [TextNode("this text doesn't have any images", TextType.PLAIN)]
+    new_nodes = split_nodes_on_regex(nodes, re.compile(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"), TextType.IMAGE)
+    self.assertEqual(new_nodes, nodes)
   
-  def test_extract_markdown_links_single(self):
-    text = "This is text with a link [to boot dev](https://www.boot.dev)"
-    self.assertEqual(extract_markdown_links(text), [("to boot dev", "https://www.boot.dev")])
+  def test_split_nodes_on_regex_extract_markdown_links_single(self):
+    nodes = [TextNode("This is text with a link [to boot dev](https://www.boot.dev)" , TextType.PLAIN)]
+    new_nodes = split_nodes_on_regex(nodes, re.compile(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"), TextType.LINK)
+    self.assertEqual(new_nodes, [TextNode("This is text with a link ", TextType.PLAIN), TextNode("to boot dev", TextType.LINK, "https://www.boot.dev")])
   
-  def test_extract_markdown_links_multiple(self):
-    text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
-    self.assertEqual(extract_markdown_links(text), [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")])
+  def test_split_nodes_on_regex_markdown_links_multiple(self):
+    nodes = [TextNode("This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)" , TextType.PLAIN)]
+    new_nodes = split_nodes_on_regex(nodes, re.compile(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"), TextType.LINK)
+    self.assertEqual(new_nodes, [TextNode("This is text with a link ", TextType.PLAIN), TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"), TextNode(" and ", TextType.PLAIN), TextNode("to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev")])
   
-  def test_extract_markdown_links_none(self):
-    text = "this text doesn't have any links"
-    self.assertEqual(extract_markdown_links(text), [])
+  def test_split_nodes_on_regex_markdown_links_none(self):
+    nodes = [TextNode("this text doesn't have any links", TextType.PLAIN)]
+    new_nodes = split_nodes_on_regex(nodes, re.compile(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"), TextType.LINK)
+    self.assertEqual(new_nodes, nodes)
+
+  def test_split_nodes_on_regex_markdown_links(self):
+    nodes = [TextNode("This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)" , TextType.PLAIN)]
+    new_nodes = split_nodes_on_regex(nodes, re.compile(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"), TextType.LINK)
+    self.assertEqual(new_nodes, [TextNode("This is text with a link ", TextType.PLAIN), TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"), TextNode(" and ", TextType.PLAIN), TextNode("to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev")])
+
+  def test_split_images(self):
+    nodes = [TextNode("This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png) and trailing text", TextType.PLAIN)]
+    new_nodes = split_nodes_on_regex(nodes, re.compile(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"), TextType.IMAGE)
+    self.assertListEqual(
+        [
+            TextNode("This is text with an ", TextType.PLAIN),
+            TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextType.PLAIN),
+            TextNode(
+                "second image", TextType.IMAGE, "https://i.imgur.com/3elNhQu.png"
+            ),
+            TextNode(" and trailing text", TextType.PLAIN),
+        ],
+        new_nodes,
+    )
