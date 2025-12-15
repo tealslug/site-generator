@@ -1,7 +1,7 @@
 import re
 import unittest
 
-from processing import split_nodes_on, split_nodes_on_regex, text_to_nodes
+from processing import split_nodes_on, split_nodes_on_regex, text_to_nodes, markdown_to_blocks
 from textnode import TextNode, TextType
 
 class TestProcessing(unittest.TestCase):
@@ -133,4 +133,57 @@ class TestProcessing(unittest.TestCase):
             TextNode("link", TextType.LINK, "https://boot.dev"),
         ],
         nodes,
+    )
+
+  def test_markdown_to_blocks_empty(self):
+    md = ""
+    blocks = markdown_to_blocks(md)
+    self.assertEqual(blocks, [])
+
+  def test_markdown_to_blocks_single(self):
+    md = "This is a single block"
+    blocks = markdown_to_blocks(md)
+    self.assertEqual(blocks, ["This is a single block"])
+
+  def test_markdown_to_blocks_trailing_newline(self):
+    md = "This is a single block\n"
+    blocks = markdown_to_blocks(md)
+    self.assertEqual(blocks, ["This is a single block"])
+
+  def test_markdown_to_blocks_leading_newline(self):
+    md = "\nThis is a single block"
+    blocks = markdown_to_blocks(md)
+    self.assertEqual(blocks, ["This is a single block"])
+
+  def test_markdown_to_blocks_leading_and_trailing_newline(self):
+    md = "\nThis is a single block\n"
+    blocks = markdown_to_blocks(md)
+    self.assertEqual(blocks, ["This is a single block"])
+
+  def test_markdown_to_blocks_single_multiline(self):
+    md = """
+This is a single block
+with multiple lines
+"""
+    blocks = markdown_to_blocks(md)
+    self.assertEqual(blocks, ["This is a single block\nwith multiple lines"])
+
+  def test_markdown_to_blocks_typical(self):
+    md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+    blocks = markdown_to_blocks(md)
+    self.assertEqual(
+        blocks,
+        [
+            "This is **bolded** paragraph",
+            "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+            "- This is a list\n- with items",
+        ],
     )

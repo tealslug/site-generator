@@ -62,3 +62,9 @@ def text_to_nodes(text: str) -> list[TextNode]:
   new_nodes = split_nodes_on_regex(new_nodes, re.compile(IMAGE_RE), TextType.IMAGE)
   new_nodes = split_nodes_on_regex(new_nodes, re.compile(LINK_RE), TextType.LINK)
   return new_nodes
+
+def markdown_to_blocks(markdown: str) -> list[str]:
+  if markdown == "":
+    return []
+  blocks = markdown.split("\n\n")
+  return [block.strip() for block in blocks]
