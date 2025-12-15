@@ -83,7 +83,7 @@ class TestProcessing(unittest.TestCase):
     new_nodes = split_nodes_on_regex(nodes, re.compile(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"), TextType.LINK)
     self.assertEqual(new_nodes, [TextNode("This is text with a link ", TextType.PLAIN), TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"), TextNode(" and ", TextType.PLAIN), TextNode("to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev")])
 
-  def test_split_images(self):
+  def test_split_nodes_on_regex_markdown_images(self):
     nodes = [TextNode("This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png) and trailing text", TextType.PLAIN)]
     new_nodes = split_nodes_on_regex(nodes, re.compile(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"), TextType.IMAGE)
     self.assertListEqual(
@@ -98,3 +98,8 @@ class TestProcessing(unittest.TestCase):
         ],
         new_nodes,
     )
+
+  def test_split_nodes_on_regex_doesnt_alter_input_when_no_match(self):
+    nodes = [TextNode("one ", TextType.PLAIN), TextNode("two", TextType.ITALIC), TextNode(" three", TextType.PLAIN)]
+    new_nodes = split_nodes_on_regex(nodes, re.compile(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"), TextType.IMAGE)
+    self.assertEqual(new_nodes, nodes)

@@ -27,9 +27,11 @@ def split_nodes_on(nodes: list[TextNode], split_on: str, text_type: TextType) ->
 # nodes of type PLAIN.  The text_type parameter is the type of the node to
 # create for the matched pairs.
 def split_nodes_on_regex(nodes: list[TextNode], regex: re.Pattern, text_type: TextType) -> list[TextNode]:
-  found = []
+  new_nodes = []
   for node in nodes:
+    found = []
     text = node.text
+
     while True:
       match = regex.search(text)
       if match is None:
@@ -39,7 +41,12 @@ def split_nodes_on_regex(nodes: list[TextNode], regex: re.Pattern, text_type: Te
         found.append(TextNode(text[:match.start()], TextType.PLAIN))
       found.append(TextNode(match.group(1), text_type, match.group(2)))
       text = text[match.end():]
-    if len(text) > 0:
-      found.append(TextNode(text, TextType.PLAIN))
 
-  return found
+    if found:
+      if len(text) > 0:
+        found.append(TextNode(text, TextType.PLAIN))
+      new_nodes.extend(found)
+    else:
+      new_nodes.append(node)
+    
+  return new_nodes
