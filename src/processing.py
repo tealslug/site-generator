@@ -1,5 +1,6 @@
 import re
 from textnode import TextNode, TextType
+from enum import Enum
 
 IMAGE_RE = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
 LINK_RE = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
@@ -71,3 +72,47 @@ def markdown_to_blocks(markdown: str) -> list[str]:
     if val != "":
       result.append(val)
   return result
+
+class BlockType(Enum):
+  PARAGRAPH = 1
+  HEADING = 2
+  CODE = 3
+  QUOTE = 4
+  UNORDERED_LIST = 5
+  ORDERED_LIST = 6
+  
+def block_to_block_type(block: str) -> BlockType:
+  lines = block.split("\n")
+
+  if block.startswith("# "):
+    return BlockType.HEADING
+  if block.startswith("```") and block.endswith("```"):
+    return BlockType.CODE
+
+  is_quote = True
+  for line in lines:
+    if not line.startswith(">"):
+      is_quote = False
+      break
+  if is_quote:
+    return BlockType.QUOTE
+
+  is_unordered_list = True
+  for line in lines:
+    if not (line.startswith("- ") or line.startswith("* ")):
+      is_unordered_list = False
+      break
+  if is_unordered_list:
+    return BlockType.UNORDERED_LIST
+
+  is_ordered_list = True
+  expected_num = 1
+  for line in lines:
+    if not line.startswith(f"{expected_num}. "):
+      is_ordered_list = False
+      break
+    expected_num += 1
+  if is_ordered_list:
+    return BlockType.ORDERED_LIST
+
+  return BlockType.PARAGRAPH

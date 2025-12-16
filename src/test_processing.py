@@ -1,7 +1,7 @@
 import re
 import unittest
 
-from processing import split_nodes_on, split_nodes_on_regex, text_to_nodes, markdown_to_blocks
+from processing import split_nodes_on, split_nodes_on_regex, text_to_nodes, markdown_to_blocks, block_to_block_type, BlockType
 from textnode import TextNode, TextType
 
 class TestProcessing(unittest.TestCase):
@@ -197,3 +197,21 @@ This is a single block
 """
     blocks = markdown_to_blocks(md)
     self.assertEqual(blocks, ["This is a single block"])
+  
+  def test_block_to_block_type(self):
+    self.assertEqual(block_to_block_type("# Heading"), BlockType.HEADING)
+    self.assertEqual(block_to_block_type("```"), BlockType.CODE)
+    self.assertEqual(block_to_block_type("> Quote"), BlockType.QUOTE)
+    self.assertEqual(block_to_block_type("- List"), BlockType.UNORDERED_LIST)
+    self.assertEqual(block_to_block_type("1. List"), BlockType.ORDERED_LIST)
+    self.assertEqual(block_to_block_type("Paragraph"), BlockType.PARAGRAPH)
+    self.assertEqual(block_to_block_type("Paragraph\nwith multiple lines"), BlockType.PARAGRAPH)
+    self.assertEqual(block_to_block_type("```\nCode block\n```"), BlockType.CODE)
+
+  def test_block_to_block_type_with_multiple_lines(self):
+    self.assertEqual(block_to_block_type("# Heading\nwith multiple lines"), BlockType.HEADING)
+    self.assertEqual(block_to_block_type("```\nCode block\nwith multiple lines\n```"), BlockType.CODE)
+    self.assertEqual(block_to_block_type("> Quote\n> with multiple lines\n> and another line"), BlockType.QUOTE)
+    self.assertEqual(block_to_block_type("- List\n- with multiple lines\n- and another line"), BlockType.UNORDERED_LIST)
+    self.assertEqual(block_to_block_type("1. List\n2. with multiple lines\n3. and another line"), BlockType.ORDERED_LIST)
+    
