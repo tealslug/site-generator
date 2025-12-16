@@ -64,7 +64,10 @@ def text_to_nodes(text: str) -> list[TextNode]:
   return new_nodes
 
 def markdown_to_blocks(markdown: str) -> list[str]:
-  if markdown == "":
-    return []
   blocks = markdown.split("\n\n")
-  return [block.strip() for block in blocks]
+  result = []
+  for block in blocks:
+    val = block.strip()
+    if val != "":
+      result.append(val)
+  return result

@@ -187,3 +187,13 @@ This is the same paragraph on a new line
             "- This is a list\n- with items",
         ],
     )
+
+  def test_markdown_to_blocks_with_multiple_blank_lines(self):
+    md = """
+This is a single block
+
+
+
+"""
+    blocks = markdown_to_blocks(md)
+    self.assertEqual(blocks, ["This is a single block"])
