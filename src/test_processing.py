@@ -215,3 +215,19 @@ This is a single block
     self.assertEqual(block_to_block_type("- List\n- with multiple lines\n- and another line"), BlockType.UNORDERED_LIST)
     self.assertEqual(block_to_block_type("1. List\n2. with multiple lines\n3. and another line"), BlockType.ORDERED_LIST)
     
+  def test_block_to_block_type_complex_cases(self):
+    self.assertEqual(block_to_block_type(" # Not a heading"), BlockType.PARAGRAPH)
+    self.assertEqual(block_to_block_type("  > Not a quote"), BlockType.PARAGRAPH)
+    self.assertEqual(block_to_block_type("```\njust a line\n```"), BlockType.CODE)
+    self.assertEqual(block_to_block_type("```\n    indented code\n```"), BlockType.CODE)
+    self.assertEqual(block_to_block_type("Paragraph with\n  multiple lines\nand some trailing spaces "), BlockType.PARAGRAPH)
+    self.assertEqual(block_to_block_type("# Heading with extra space"), BlockType.HEADING)
+    self.assertEqual(block_to_block_type("```\n\n```"), BlockType.CODE) # Empty code block
+    self.assertEqual(block_to_block_type("> Single line quote"), BlockType.QUOTE)
+    self.assertEqual(block_to_block_type("    Just some indented text, not code block"), BlockType.PARAGRAPH)
+  
+  def test_block_to_block_type_unordered_list(self):
+    self.assertEqual(block_to_block_type("- list item\n- another item\n"), BlockType.UNORDERED_LIST)
+  
+  def test_block_to_block_type_ordered_list(self):
+    self.assertEqual(block_to_block_type("1. list item\n2. another item\n"), BlockType.ORDERED_LIST)

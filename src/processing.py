@@ -99,7 +99,10 @@ def block_to_block_type(block: str) -> BlockType:
 
   is_unordered_list = True
   for line in lines:
-    if not (line.startswith("- ") or line.startswith("* ")):
+    line = line.strip()
+    if line == "":
+      continue
+    if not line.startswith("- "):
       is_unordered_list = False
       break
   if is_unordered_list:
@@ -108,6 +111,9 @@ def block_to_block_type(block: str) -> BlockType:
   is_ordered_list = True
   expected_num = 1
   for line in lines:
+    line = line.strip()
+    if line == "":
+      continue
     if not line.startswith(f"{expected_num}. "):
       is_ordered_list = False
       break
