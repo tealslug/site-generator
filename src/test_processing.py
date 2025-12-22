@@ -231,3 +231,8 @@ This is a single block
   
   def test_block_to_block_type_ordered_list(self):
     self.assertEqual(block_to_block_type("1. list item\n2. another item\n"), BlockType.ORDERED_LIST)
+
+  def test_split_nodes_on_unmatched_delimiter(self):
+    nodes = [TextNode("one **two three", TextType.PLAIN)]
+    with self.assertRaises(Exception):
+      split_nodes_on(nodes, "**", TextType.BOLD)
