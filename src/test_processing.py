@@ -236,3 +236,8 @@ This is a single block
     nodes = [TextNode("one **two three", TextType.PLAIN)]
     with self.assertRaises(Exception):
       split_nodes_on(nodes, "**", TextType.BOLD)
+
+  def test_split_nodes_on_unmatched_delimiter_with_multiple_nodes(self):
+    nodes = [TextNode("one **two three", TextType.PLAIN), TextNode("four", TextType.PLAIN)]
+    with self.assertRaises(Exception):
+      split_nodes_on(nodes, "**", TextType.BOLD)
