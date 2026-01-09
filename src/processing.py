@@ -1,9 +1,11 @@
+from src.htmlnode import HTMLNode
 import re
 from textnode import TextNode, TextType
 from enum import Enum
 
 IMAGE_RE = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
 LINK_RE = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
+HEADING_RE = r"^#{1,6} "
 
 def split_nodes_on(nodes: list[TextNode], split_on: str, text_type: TextType) -> list[TextNode]:
   new_nodes = []
@@ -84,8 +86,9 @@ class BlockType(Enum):
 def block_to_block_type(block: str) -> BlockType:
   lines = block.split("\n")
 
-  if block.startswith("# "):
+  if re.match(HEADING_RE, block):
     return BlockType.HEADING
+
   if block.startswith("```") and block.endswith("```"):
     return BlockType.CODE
 

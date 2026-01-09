@@ -241,3 +241,12 @@ This is a single block
     nodes = [TextNode("one **two three", TextType.PLAIN), TextNode("four", TextType.PLAIN)]
     with self.assertRaises(Exception):
       split_nodes_on(nodes, "**", TextType.BOLD)
+
+  def test_block_to_block_type_heading_levels(self):
+    self.assertEqual(block_to_block_type("# Heading 1"), BlockType.HEADING)
+    self.assertEqual(block_to_block_type("## Heading 2"), BlockType.HEADING)
+    self.assertEqual(block_to_block_type("### Heading 3"), BlockType.HEADING)
+    self.assertEqual(block_to_block_type("#### Heading 4"), BlockType.HEADING)
+    self.assertEqual(block_to_block_type("##### Heading 5"), BlockType.HEADING)
+    self.assertEqual(block_to_block_type("###### Heading 6"), BlockType.HEADING)
+    self.assertEqual(block_to_block_type("####### Not a heading"), BlockType.PARAGRAPH)
