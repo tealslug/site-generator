@@ -250,3 +250,19 @@ This is a single block
     self.assertEqual(block_to_block_type("##### Heading 5"), BlockType.HEADING)
     self.assertEqual(block_to_block_type("###### Heading 6"), BlockType.HEADING)
     self.assertEqual(block_to_block_type("####### Not a heading"), BlockType.PARAGRAPH)
+
+  def test_block_to_block_type_quote_validation(self):
+    self.assertEqual(block_to_block_type("> quote\n> more quote"), BlockType.QUOTE)
+    self.assertEqual(block_to_block_type("> quote\nmissing arrow"), BlockType.PARAGRAPH)
+
+  def test_block_to_block_type_unordered_list_star(self):
+    self.assertEqual(block_to_block_type("* item 1\n* item 2"), BlockType.UNORDERED_LIST)
+
+  def test_block_to_block_type_ordered_list_sequence(self):
+    self.assertEqual(block_to_block_type("1. first\n2. second\n3. third"), BlockType.ORDERED_LIST)
+    self.assertEqual(block_to_block_type("1. first\n3. third"), BlockType.PARAGRAPH)
+    self.assertEqual(block_to_block_type("2. first\n3. second"), BlockType.PARAGRAPH)
+
+  def test_block_to_block_type_code_validation(self):
+    self.assertEqual(block_to_block_type("```\ncode\n```"), BlockType.CODE)
+    self.assertEqual(block_to_block_type("```\nno closing"), BlockType.PARAGRAPH)

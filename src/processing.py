@@ -6,6 +6,7 @@ from enum import Enum
 IMAGE_RE = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
 LINK_RE = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
 HEADING_RE = r"^#{1,6} "
+UNORDERED_LIST_RE = r"^[\*\-\+] "
 
 def split_nodes_on(nodes: list[TextNode], split_on: str, text_type: TextType) -> list[TextNode]:
   new_nodes = []
@@ -105,7 +106,7 @@ def block_to_block_type(block: str) -> BlockType:
     line = line.strip()
     if line == "":
       continue
-    if not line.startswith("- "):
+    if not re.match(UNORDERED_LIST_RE, line):
       is_unordered_list = False
       break
   if is_unordered_list:
