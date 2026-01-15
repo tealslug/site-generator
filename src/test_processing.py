@@ -1,7 +1,7 @@
 import re
 import unittest
 
-from processing import split_nodes_on, split_nodes_on_regex, text_to_nodes, markdown_to_blocks, block_to_block_type, BlockType
+from processing import split_nodes_on, split_nodes_on_regex, text_to_nodes, markdown_to_blocks, block_to_block_type, BlockType, markdown_to_html_node
 from textnode import TextNode, TextType
 
 class TestProcessing(unittest.TestCase):
@@ -200,7 +200,6 @@ This is a single block
   
   def test_block_to_block_type(self):
     self.assertEqual(block_to_block_type("# Heading"), BlockType.HEADING)
-    self.assertEqual(block_to_block_type("```"), BlockType.CODE)
     self.assertEqual(block_to_block_type("> Quote"), BlockType.QUOTE)
     self.assertEqual(block_to_block_type("- List"), BlockType.UNORDERED_LIST)
     self.assertEqual(block_to_block_type("1. List"), BlockType.ORDERED_LIST)
@@ -266,3 +265,116 @@ This is a single block
   def test_block_to_block_type_code_validation(self):
     self.assertEqual(block_to_block_type("```\ncode\n```"), BlockType.CODE)
     self.assertEqual(block_to_block_type("```\nno closing"), BlockType.PARAGRAPH)
+
+  def test_paragraphs(self):
+    md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+
+    node = markdown_to_html_node(md)
+    html = node.to_html()
+    self.assertEqual(
+        html,
+        "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+    )
+
+  def test_headings(self):
+    md = """
+# Heading 1
+
+## Heading 2
+
+### Heading 3
+
+#### Heading 4
+
+##### Heading 5
+
+###### Heading 6
+"""
+    node = markdown_to_html_node(md)
+    html = node.to_html()
+    self.assertEqual(
+        html,
+        "<div><h1>Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3><h4>Heading 4</h4><h5>Heading 5</h5><h6>Heading 6</h6></div>",
+    )
+  
+  def test_bad_heading(self):
+    md = """
+####### Heading 7
+"""
+    node = markdown_to_html_node(md)
+    html = node.to_html()
+    self.assertEqual(
+        html,
+        "<div><p>####### Heading 7</p></div>",
+    )
+
+  def test_simple_codeblock(self):
+    md = """
+```
+code
+```
+"""
+    node = markdown_to_html_node(md)
+    html = node.to_html()
+    self.assertEqual(
+        html,
+        "<div><pre><code>code\n</code></pre></div>",
+    )
+
+  def test_complex_codeblock(self):
+    md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+
+    node = markdown_to_html_node(md)
+    html = node.to_html()
+    self.assertEqual(
+        html,
+        "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+    )
+
+  def test_unordered_lists(self):
+    md = """
+- item 1
+- item 2
+"""
+    node = markdown_to_html_node(md)
+    html = node.to_html()
+    self.assertEqual(
+        html,
+        "<div><ul><li>item 1</li><li>item 2</li></ul></div>",
+    )
+
+  def test_ordered_lists(self):
+    md = """
+1. item 1
+2. item 2
+"""
+    node = markdown_to_html_node(md)
+    html = node.to_html()
+    self.assertEqual(
+        html,
+        "<div><ol><li>item 1</li><li>item 2</li></ol></div>",
+    )
+
+  def test_quotes(self):
+    md = """
+> quote
+> more quote
+"""
+    node = markdown_to_html_node(md)
+    html = node.to_html()
+    self.assertEqual(
+        html,
+        "<div><blockquote>quote more quote</blockquote></div>",
+    )
