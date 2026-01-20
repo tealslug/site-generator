@@ -66,6 +66,20 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(html_node.value, "")
         self.assertEqual(html_node.props, {"src": "https://example.com"})
 
+    def test_different_text(self):
+        node = TextNode("This is a text node", TextType.BOLD)
+        node2 = TextNode("This is a different text node", TextType.BOLD)
+        self.assertNotEqual(node, node2)
+
+    def test_different_url(self):
+        node = TextNode("This is a text node", TextType.LINK, "https://example.com")
+        node2 = TextNode("This is a text node", TextType.LINK, "https://google.com")
+        self.assertNotEqual(node, node2)
+
+    def test_url_is_none(self):
+        node = TextNode("This is a text node", TextType.PLAIN)
+        self.assertIsNone(node.url)
+
 
 if __name__ == "__main__":
     unittest.main()
