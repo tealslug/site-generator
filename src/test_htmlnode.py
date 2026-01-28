@@ -4,6 +4,10 @@ from htmlnode import HTMLNode
 
 
 class TestHTMLNode(unittest.TestCase):
+    def test_to_html_not_implemented(self):
+        node = HTMLNode("p", "hello world")
+        self.assertRaises(NotImplementedError, node.to_html)
+
     def test_eq(self):
         node = HTMLNode("div", "This is a text node", [HTMLNode("p", "This is a paragraph")], {"class": "test"})
         node2 = HTMLNode("div", "This is a text node", [HTMLNode("p", "This is a paragraph")], {"class": "test"})
