@@ -21,4 +21,8 @@ class TestLeafNode(unittest.TestCase):
     def test_to_html(self):
         node = LeafNode("div", "This is a text node", {"class": "test"})
         self.assertEqual(node.to_html(), "<div class=\"test\">This is a text node</div>")
-        
+
+    def test_to_html_no_value(self):
+        node = LeafNode("p", None)
+        with self.assertRaises(ValueError):
+            node.to_html()
