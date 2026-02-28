@@ -37,6 +37,15 @@ class TestParentNode(unittest.TestCase):
             "<div><span><b>grandchild</b></span></div>",
         )
 
+    def test_to_html_no_tag(self):
+        node = ParentNode(None, [LeafNode("b", "bold")])
+        with self.assertRaises(ValueError):
+            node.to_html()
+
+    def test_to_html_no_children(self):
+        node = ParentNode("div", None)
+        with self.assertRaises(ValueError):
+            node.to_html()
 
 if __name__ == "__main__":
     unittest.main()
